@@ -1,0 +1,660 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1b2a4a;
+
+  /* ===== DESIGN TOKENS — Matched to Alayn logo palette ===== */
+
+  /* Light backgrounds */
+  --cream: #FFFFFF;
+  --cream-light: #F4F5F8;       /* Very subtle navy-tinted off-white */
+
+  /* Deep navy — logo's dominant color (wordmark + right stroke) */
+  --espresso: #1B2A4A;
+  --espresso-mid: #243556;
+
+  /* Crimson red — logo's accent (left stroke + tagline text) */
+  --amber: #C41E2A;
+  --amber-light: #D4293A;
+
+  /* Thread canvas */
+  --thread: rgba(196, 30, 42, 0.75);
+  --thread-warm: rgba(212, 41, 58, 0.6);
+
+  /* Brand red lifted for text on navy sections (~6.5:1 on --espresso);
+     the base crimson only reaches 2.4:1 there */
+  --amber-on-dark: #FF8A8F;
+  /* Exact brand crimson for large headings on navy, matching the hero.
+     Deliberate brand choice: 2.4:1 on --espresso, below WCAG 3:1 for large text */
+  --amber-display-dark: #C41E2A;
+
+  /* Muted blue-gray (echoes the navy) — darkened from #6B7A90 to clear
+     4.5:1 on both white and --cream-light */
+  --muted: #56657C;
+
+  /* Borders — navy-tinted */
+  --border-warm: rgba(27, 42, 74, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-plus-jakarta);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-plus-jakarta), system-ui, -apple-system, sans-serif;
+}
+
+/* Shared form input style used across the dashboard */
+.input {
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #3f3f46;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: #D3232A;
+}
+
+/* Shared button styles */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.5rem;
+  background-color: #D3232A;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.btn-primary:hover { background-color: #b01e23; }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 1px solid #d4d4d8;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #3f3f46;
+  background-color: #ffffff;
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.btn-ghost:hover { background-color: #f4f4f5; }
+
+/* Form field label */
+.field-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #71717a;
+  margin-bottom: 0.25rem;
+}
+
+
+
+/* ==============================
+   LANDING PAGE STYLES
+   ============================== */
+
+.landing-root {
+  background: var(--cream);
+  color: var(--espresso);
+  overflow-x: clip;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---- Reveal Animations ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.35s; }
+.reveal-delay-4 { transition-delay: 0.5s; }
+.reveal-delay-5 { transition-delay: 0.65s; }
+.reveal-delay-6 { transition-delay: 0.8s; }
+
+/* ---- Thread Canvas ---- */
+.thread-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---- Navigation ---- */
+.landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(228, 228, 231, 0.8);
+  transition: box-shadow 0.3s ease;
+}
+
+.landing-nav.scrolled {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* ---- Hero ---- */
+.hero-section {
+  position: relative;
+  overflow: clip;
+  background: var(--cream);
+}
+
+.hero-headline {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--espresso);
+}
+
+/* ---- Hero aurora (Stripe-style soft gradient wash) ----
+   Only `transform` animates, so the blurred layer is rasterized once and
+   then moved by the compositor — no per-frame repaint, no GPU shader cost.
+   This is what replaced the WebGL field. */
+.hero-aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(55px);
+  opacity: 0.5;
+  pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.hero-aurora-a {
+  top: -22%;
+  right: -10%;
+  width: 62vw;
+  height: 62vw;
+  max-width: 900px;
+  max-height: 900px;
+  background: radial-gradient(circle at 30% 30%, rgba(196, 30, 42, 0.30), transparent 65%);
+  animation: aurora-drift-a 26s ease-in-out infinite alternate;
+}
+
+.hero-aurora-b {
+  bottom: -30%;
+  left: -14%;
+  width: 58vw;
+  height: 58vw;
+  max-width: 820px;
+  max-height: 820px;
+  background: radial-gradient(circle at 60% 40%, rgba(27, 42, 74, 0.26), transparent 65%);
+  animation: aurora-drift-b 32s ease-in-out infinite alternate;
+}
+
+.hero-aurora-c {
+  top: 22%;
+  left: 26%;
+  width: 40vw;
+  height: 40vw;
+  max-width: 560px;
+  max-height: 560px;
+  background: radial-gradient(circle at 50% 50%, rgba(196, 30, 42, 0.08), transparent 68%);
+  animation: aurora-drift-c 38s ease-in-out infinite alternate;
+}
+
+/* ---- Auth Liquid Glass aurora ---- */
+.auth-aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.auth-aurora-1 {
+  top: -20%;
+  left: -10%;
+  width: 80vw;
+  height: 80vw;
+  max-width: 1200px;
+  max-height: 1200px;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.25), transparent 65%);
+  animation: aurora-drift-a 25s ease-in-out infinite alternate;
+}
+
+.auth-aurora-2 {
+  bottom: -20%;
+  right: -20%;
+  width: 75vw;
+  height: 75vw;
+  max-width: 1100px;
+  max-height: 1100px;
+  background: radial-gradient(circle at 50% 50%, rgba(225, 29, 72, 0.25), transparent 65%);
+  animation: aurora-drift-b 30s ease-in-out infinite alternate;
+}
+
+.auth-aurora-3 {
+  top: 20%;
+  left: 30%;
+  width: 60vw;
+  height: 60vw;
+  max-width: 900px;
+  max-height: 900px;
+  background: radial-gradient(circle at 50% 50%, rgba(196, 30, 42, 0.2), transparent 65%);
+  animation: aurora-drift-c 35s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-6%, 8%, 0) scale(1.12); }
+}
+
+@keyframes aurora-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to   { transform: translate3d(8%, -6%, 0) scale(1); }
+}
+
+@keyframes aurora-drift-c {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(10%, 6%, 0) scale(1.18); }
+}
+
+/* ---- Section base ---- */
+.landing-section {
+  position: relative;
+  padding: 120px 0;
+}
+
+@media (max-width: 768px) {
+  .landing-section {
+    padding: 80px 0;
+  }
+}
+
+/* ---- Dark / Navy sections ---- */
+.section-dark {
+  background: var(--espresso);
+  color: #FFFFFF;
+}
+
+.section-dark .muted-text {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---- Crimson accent line ---- */
+.accent-line {
+  display: inline-block;
+  width: 32px;
+  height: 1.5px;
+  background: var(--amber);
+  border-radius: 2px;
+}
+
+/* ---- Cards ---- */
+.value-card {
+  border: 1px solid var(--border-warm);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 32px;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background 0.3s ease;
+  cursor: default;
+}
+
+.value-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(27, 42, 74, 0.08);
+  background: #FFFFFF;
+}
+
+/* ---- Comparison table ---- */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 16px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-warm);
+  font-size: 0.875rem;
+}
+
+.compare-table th {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.compare-table td:first-child {
+  font-weight: 500;
+  color: var(--espresso);
+}
+
+.compare-highlight {
+  background: rgba(196, 30, 42, 0.04);
+}
+
+/* ---- Buttons ---- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--espresso);
+  color: #FFFFFF;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(27, 42, 74, 0.22);
+  background: var(--espresso-mid);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--espresso);
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  border: 1px solid rgba(27, 42, 74, 0.2);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-ghost:hover {
+  transform: translateY(-1px);
+  border-color: rgba(27, 42, 74, 0.4);
+  background: rgba(27, 42, 74, 0.03);
+}
+
+/* ---- Scroll indicator ---- */
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(6px); opacity: 1; }
+}
+
+.scroll-indicator {
+  animation: scroll-bounce 2s ease-in-out infinite;
+}
+
+/* ---- Orbit animations ---- */
+@keyframes orbit-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+.orbit-line {
+  animation: orbit-pulse 3s ease-in-out infinite;
+}
+
+/* ---- AI typewriter cursor ---- */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typewriter-cursor {
+  animation: blink-cursor 1s step-end infinite;
+}
+
+/* ---- Noise texture ---- */
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.03;
+  transform: translateZ(0);
+}
+
+/* ---- Hover utilities ---- */
+.nav-login-btn {
+  transition: background 0.2s ease;
+}
+.nav-login-btn:hover {
+  background: rgba(27, 42, 74, 0.05);
+}
+
+.btn-primary-light {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  color: var(--espresso);
+  padding: 16px 36px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-primary-light:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+.btn-ghost-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 15px 28px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.btn-ghost-dark:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.footer-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.footer-link:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .scroll-indicator,
+  .orbit-line,
+  .typewriter-cursor,
+  .hero-aurora-a,
+  .hero-aurora-b,
+  .hero-aurora-c {
+    animation: none;
+  }
+}
+
+/* ---- Phones and reduced motion: drop the expensive blurs ----
+   The aurora blobs are radial gradients that are already soft, so the extra
+   filter barely shows but costs a large raster on a phone GPU. Frosted
+   cards re-blur whatever moves behind them every frame; a near-opaque
+   fill looks the same at this size. */
+@media (max-width: 640px), (prefers-reduced-motion: reduce) {
+  .hero-aurora,
+  .auth-aurora {
+    filter: none;
+  }
+  .landing-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(245, 245, 247, 0.97) !important;
+  }
+}
+
+/* ---- Utility to hide scrollbar ---- */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* ---- Hero Phone Mockup Responsive Styling ---- */
+.hero-phone-mockup {
+  width: clamp(180px, 28%, 260px);
+  left: -50px;
+}
+@media (max-width: 640px) {
+  .hero-phone-mockup {
+    width: 170px !important;
+    left: 8px !important;
+    bottom: -15px !important;
+  }
+}
+
+/* ── Thermal Receipt Roll-Out Animation ──────────────────────────────────────
+   Mimics paper feeding out of a thermal receipt printer.
+   Uses clip-path reveal from top for hardware acceleration.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@keyframes receipt-roll-out {
+  0% {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  72% {
+    clip-path: inset(0 0 0% 0);
+    transform: translateY(3px);
+  }
+  88% {
+    transform: translateY(-1px);
+  }
+  100% {
+    clip-path: inset(0 0 0% 0);
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+@keyframes receipt-modal-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(-10px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.005) translateY(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes receipt-backdrop-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.receipt-roll-animation {
+  animation: receipt-roll-out 1500ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  will-change: clip-path, transform;
+}
+
+.receipt-modal-animation {
+  animation: receipt-modal-in 380ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.receipt-backdrop-animation {
+  animation: receipt-backdrop-in 250ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .receipt-roll-animation,
+  .receipt-modal-animation {
+    animation: none;
+    clip-path: inset(0 0 0% 0);
+    transform: none;
+    opacity: 1;
+  }
+  .receipt-backdrop-animation {
+    animation: none;
+  }
+}
+
+@keyframes printer-light-sweep {
+  0% { opacity: 0; transform: translateX(-100%); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(400%); }
+}
