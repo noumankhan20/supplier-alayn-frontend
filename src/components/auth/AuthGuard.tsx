@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { verifySession, logout, SESSION_FRESH_MS } from "@/redux/slices/authSlice";
 import { MAIN_APP_URL } from "@/lib/apiBase";
-import { ShieldAlert, LogOut, ArrowRight, Home } from "lucide-react";
+import { ShieldAlert, LogOut, ArrowRight, Home, WifiOff, RotateCw } from "lucide-react";
 import AuthLoader from "./AuthLoader";
 
 interface AuthGuardProps {
@@ -22,6 +22,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const user = useAppSelector((s) => s.auth.user);
   const lastVerifiedAt = useAppSelector((s) => s.auth.lastVerifiedAt);
   const verifying = useAppSelector((s) => s.auth.verifying);
+  const verifyFailed = useAppSelector((s) => s.auth.verifyFailed);
 
   useEffect(() => {
     if (status === "unauthenticated") return;
@@ -38,7 +39,36 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [status, pathname, router]);
 
-  if (status === "unknown" || verifying) {
+  // The first check could not reach the server. Nothing would retry on its own, so offer it.
+  if (status === "unknown" && verifyFailed && !verifying) {
+    return (
+      <div className="min-h-screen bg-[#F4F7F9] flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-6 sm:p-8 shadow-xl ring-1 ring-black/5 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-[#C41E2A] mb-4">
+            <WifiOff className="h-7 w-7" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 font-serif">
+            Can&apos;t reach the Supplier Portal
+          </h2>
+          <p className="mt-2 text-xs text-gray-600 leading-relaxed">
+            We couldn&apos;t confirm your session. Check your connection and try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => void dispatch(verifySession())}
+            className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-[#C41E2A] py-2.5 px-4 text-xs font-bold text-white shadow-sm hover:bg-[#A81822] transition"
+          >
+            <RotateCw className="h-4 w-4" />
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Only block the page while there is no session yet. A background re-check of a signed-in user
+  // keeps the page mounted, so forms don't lose what was typed.
+  if (status === "unknown") {
     return <AuthLoader />;
   }
 

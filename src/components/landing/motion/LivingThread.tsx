@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useSpring, useTransform, useVelocity } from "framer-motion";
+import { motion, useSpring, useTransform, useVelocity, type MotionValue } from "framer-motion";
 
 // A distinct deep navy/espresso color with varying opacities to simulate depth.
 const COLORS = [
@@ -41,7 +41,7 @@ const INITIAL_PATHS = [
 // Grid lines positions matching INITIAL_PATHS startX to emphasize structure
 const GRID_LINES = [10, 25, 40, 50, 60, 75, 90];
 
-export default function LivingThread({ progress }: { progress: any }) {
+export default function LivingThread({ progress }: { progress: MotionValue<number> }) {
   // Ultra-calm, heavy spring. The thread does not slide or snap; it breathes and slowly settles.
   const smoothProgress = useSpring(progress, {
     stiffness: 12,
@@ -123,8 +123,8 @@ function ThreadPath({
 }: {
   initial: typeof TARGET_PATH;
   target: typeof TARGET_PATH;
-  progress: any;
-  dragY: any;
+  progress: MotionValue<number>;
+  dragY: MotionValue<number>;
   color: string;
   strokeWidth: number;
 }) {
@@ -141,13 +141,13 @@ function ThreadPath({
   const endY = useTransform(progress, [0, 1], [initial.endY, target.endY]);
 
   // Apply velocity-based vertical bowing to the control points to simulate silk drag
-  const cp1Y = useTransform([baseCp1Y, dragY], ([baseY, drag]: any[]) => baseY + drag);
-  const cp2Y = useTransform([baseCp2Y, dragY], ([baseY, drag]: any[]) => baseY + drag);
+  const cp1Y = useTransform([baseCp1Y, dragY], ([baseY, drag]: number[]) => baseY + drag);
+  const cp2Y = useTransform([baseCp2Y, dragY], ([baseY, drag]: number[]) => baseY + drag);
 
   // Construct the SVG path string dynamically
   const path = useTransform(
     [startX, startY, baseCp1X, cp1Y, baseCp2X, cp2Y, endX, endY],
-    ([sx, sy, c1x, c1y, c2x, c2y, ex, ey]: any[]) =>
+    ([sx, sy, c1x, c1y, c2x, c2y, ex, ey]: number[]) =>
       `M ${sx},${sy} C ${c1x},${c1y} ${c2x},${c2y} ${ex},${ey}`
   );
 

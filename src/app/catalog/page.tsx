@@ -8,15 +8,9 @@ import {
   Filter,
   Pencil,
   Trash2,
-  Check,
-  X,
-  IndianRupee,
   Clock,
-  Award,
   AlertTriangle,
-  Loader2,
   Tag,
-  CheckCircle2,
   XCircle,
 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
@@ -31,6 +25,7 @@ import {
   SupplierItemApi,
 } from "@/redux/slices/supplierApiSlice";
 import { formatPrice } from "@/lib/utils";
+import { apiErrorMessage } from "@/lib/apiError";
 
 const COMMON_CATEGORIES = [
   "Dairy",
@@ -191,12 +186,8 @@ export default function SupplierCatalogPage() {
       }
       setIsModalOpen(false);
       refetch();
-    } catch (err: any) {
-      setFormError(
-        err?.data?.error?.message ||
-          err?.data?.message ||
-          "Failed to save item. Please check the inputs."
-      );
+    } catch (err) {
+      setFormError(apiErrorMessage(err, "Failed to save item. Please check the inputs."));
     }
   };
 
@@ -207,8 +198,8 @@ export default function SupplierCatalogPage() {
         data: { inStock: !item.inStock },
       }).unwrap();
       refetch();
-    } catch (err: any) {
-      alert("Failed to update stock status");
+    } catch (err) {
+      alert(apiErrorMessage(err, "Failed to update stock status"));
     }
   };
 
@@ -218,8 +209,8 @@ export default function SupplierCatalogPage() {
       await deleteItem(itemToDelete.id).unwrap();
       setItemToDelete(null);
       refetch();
-    } catch (err: any) {
-      alert("Failed to delete item");
+    } catch (err) {
+      alert(apiErrorMessage(err, "Failed to delete item"));
     }
   };
 

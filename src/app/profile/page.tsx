@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   User,
   Mail,
@@ -19,8 +19,6 @@ import {
   Tag,
   MapPin,
   Truck,
-  Shield,
-  Loader2,
 } from "lucide-react";
 import SupplierLayout from "@/components/layout/SupplierLayout";
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
@@ -34,6 +32,7 @@ import {
   useUpdateMyProfileMutation,
 } from "@/redux/slices/supplierApiSlice";
 import { passwordProblem } from "@/lib/passwordPolicy";
+import { apiErrorMessage } from "@/lib/apiError";
 
 function getInitials(name: string): string {
   if (!name) return "S";
@@ -50,7 +49,7 @@ export default function SupplierProfilePage() {
   const user = useAppSelector((state) => state.auth.user);
 
   // Business Profile Query & Mutation
-  const { data: supplierProfile, isLoading: isSupplierLoading } =
+  const { data: supplierProfile } =
     useGetMyProfileQuery();
   const [updateSupplierProfile, { isLoading: isUpdatingSupplier }] =
     useUpdateMyProfileMutation();
@@ -78,20 +77,22 @@ export default function SupplierProfilePage() {
   );
   const [supplierErrorMsg, setSupplierErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (supplierProfile) {
-      setSupplierForm({
-        name: supplierProfile.name || "",
-        contactPerson: supplierProfile.contactPerson || "",
-        phone: supplierProfile.phone || "",
-        email: supplierProfile.email || "",
-        address: supplierProfile.address || "",
-        category: supplierProfile.category || "",
-        gstNumber: supplierProfile.gstNumber || "",
-        deliveryTerms: supplierProfile.deliveryTerms || "",
-      });
-    }
-  }, [supplierProfile]);
+  // Refill the form whenever a new copy of the profile arrives (first load, or after a save).
+  // Done during render rather than in an effect, so the form never renders once with stale values.
+  const [syncedProfile, setSyncedProfile] = useState<typeof supplierProfile>(undefined);
+  if (supplierProfile && supplierProfile !== syncedProfile) {
+    setSyncedProfile(supplierProfile);
+    setSupplierForm({
+      name: supplierProfile.name || "",
+      contactPerson: supplierProfile.contactPerson || "",
+      phone: supplierProfile.phone || "",
+      email: supplierProfile.email || "",
+      address: supplierProfile.address || "",
+      category: supplierProfile.category || "",
+      gstNumber: supplierProfile.gstNumber || "",
+      deliveryTerms: supplierProfile.deliveryTerms || "",
+    });
+  }
 
   const handleSupplierSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,30 +118,29 @@ export default function SupplierProfilePage() {
       setSupplierSuccessMsg("Business profile updated successfully!");
       setSupplierEditMode(false);
       setTimeout(() => setSupplierSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setSupplierErrorMsg(
-        err?.data?.error?.message ||
-          err?.data?.message ||
-          "Failed to update business profile."
-      );
+    } catch (err) {
+      setSupplierErrorMsg(apiErrorMessage(err, "Failed to update business profile."));
     }
   };
 
   // 2. Personal Profile Form State
   const [userEditMode, setUserEditMode] = useState(false);
   const [userFormData, setUserFormData] = useState({
-    name: "",
-    phoneNo: "",
+    name: user?.name || "",
+    phoneNo: user?.phoneNo || "",
   });
   const [userSuccessMsg, setUserSuccessMsg] = useState<string | null>(null);
   const [userErrorMsg, setUserErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Same for the signed-in user's details
+  const [syncedUser, setSyncedUser] = useState(user);
+  if (user !== syncedUser) {
+    setSyncedUser(user);
     setUserFormData({
       name: user?.name || "",
       phoneNo: user?.phoneNo || "",
     });
-  }, [user]);
+  }
 
   const handleUserSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,12 +162,8 @@ export default function SupplierProfilePage() {
       setUserSuccessMsg("Personal details updated!");
       setUserEditMode(false);
       setTimeout(() => setUserSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setUserErrorMsg(
-        err?.data?.error?.message ||
-          err?.data?.message ||
-          "Failed to update personal details."
-      );
+    } catch (err) {
+      setUserErrorMsg(apiErrorMessage(err, "Failed to update personal details."));
     }
   };
 
@@ -208,12 +204,8 @@ export default function SupplierProfilePage() {
       setPwForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
       setShowPasswordSection(false);
       setTimeout(() => setPwSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setPwErrorMsg(
-        err?.data?.error?.message ||
-          err?.data?.message ||
-          "Failed to update password."
-      );
+    } catch (err) {
+      setPwErrorMsg(apiErrorMessage(err, "Failed to update password."));
     }
   };
 

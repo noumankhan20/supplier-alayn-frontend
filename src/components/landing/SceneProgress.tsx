@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const SCENES = [
@@ -21,7 +21,6 @@ const SCENES = [
  */
 export default function SceneProgress() {
   const [active, setActive] = useState(0);
-  const ratiosRef = useRef<number[]>(new Array(SCENES.length).fill(0));
 
   useEffect(() => {
     if (typeof window === "undefined" || window.innerWidth < 960) return;

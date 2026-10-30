@@ -1,4 +1,4 @@
-import { baseApi } from "../store/baseApi";
+import { baseApi, type ApiEnvelope } from "../store/baseApi";
 
 export interface PurchaseOrderItemApi {
   id?: string;
@@ -40,7 +40,14 @@ export interface PurchaseOrderApi {
   closedReason?: string;
   closedAt?: string;
   outletId?: string;
-  outlet?: { id: string; name: string };
+  outlet?: {
+    id: string;
+    name: string;
+    restaurantName?: string;
+    address?: string;
+    city?: string;
+    phone?: string;
+  };
   supplier?: { id: string; name: string };
   createdAt?: string;
   items: PurchaseOrderItemApi[];
@@ -51,7 +58,7 @@ export const procurementApi = baseApi.injectEndpoints({
     getSupplierPortalOrders: builder.query<PurchaseOrderApi[], void>({
       query: () => "/purchase-orders/portal/orders",
       providesTags: ["PurchaseOrder"],
-      transformResponse: (response: any) => response?.data ?? response ?? [],
+      transformResponse: (response: ApiEnvelope<PurchaseOrderApi[] | null>) => response.data ?? [],
     }),
 
     updateSupplierPOStatus: builder.mutation<

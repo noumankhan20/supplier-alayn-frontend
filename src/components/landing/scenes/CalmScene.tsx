@@ -1,7 +1,6 @@
 "use client";
 
 import { FieldScene } from "../motion/GlobalField";
-import { Assemble } from "../motion/primitives";
 
 export default function CalmScene() {
   return (

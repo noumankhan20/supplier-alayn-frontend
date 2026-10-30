@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { FieldScene } from "../motion/GlobalField";
 import { Assemble, useMagnetic, springSnappy } from "../motion/primitives";
 import { introHoldSeconds } from "../introTiming";
@@ -19,13 +19,6 @@ import { introHoldSeconds } from "../introTiming";
  * globals.css) — transform-only animation, no canvas, no WebGL, no
  * per-pixel cost.
  */
-
-const SNAPSHOT = [
-  { label: "Orders", value: "128", detail: "synced today", state: "ok" as const },
-  { label: "Stock", value: "Low", detail: "1 item flagged before it runs out", state: "attention" as const },
-  { label: "Staff", value: "6", detail: "on shift now", state: "ok" as const },
-  { label: "Waste", value: "₹340", detail: "tracked this week", state: "ok" as const },
-];
 
 function MagneticLink({
   href,
@@ -49,22 +42,6 @@ function MagneticLink({
 }
 
 export default function HeroScene() {
-  // The syncing row rotates so the panel reads as live without any element
-  // actually moving — cheapest possible sense of activity.
-  const [syncing, setSyncing] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setSyncing((p) => (p + 1) % SNAPSHOT.length), 2400);
-    return () => clearInterval(t);
-  }, []);
-
-  // The alert card appears a beat after the panel, then stays — it's the
-  // proof of the "you always know what needs you" claim.
-  const [showAlert, setShowAlert] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setShowAlert(true), 1500);
-    return () => clearTimeout(t);
-  }, []);
-
   // The mockups below animate on mount rather than through Assemble, so they
   // take the logo reveal's remaining time once, at mount.
   const [introHold] = useState(introHoldSeconds);

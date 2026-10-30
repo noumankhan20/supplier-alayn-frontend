@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Package,
   Layers,
@@ -18,9 +18,11 @@ import { useLogoutMutation } from "@/redux/slices/authApiSlice";
 import { logout } from "@/redux/slices/authSlice";
 import { baseApi } from "@/redux/store/baseApi";
 import { MAIN_APP_URL } from "@/lib/apiBase";
+import { clearUserHint } from "@/components/landing/landingSession";
 
 export default function SupplierHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const [logoutApi] = useLogoutMutation();
   const user = useAppSelector((state) => state.auth.user);
@@ -183,7 +185,8 @@ export default function SupplierHeader() {
                   } finally {
                     dispatch(baseApi.util.resetApiState());
                     dispatch(logout());
-                    window.location.href = "/login";
+                    clearUserHint();
+                    router.replace("/login");
                   }
                 }}
                 className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition text-left"

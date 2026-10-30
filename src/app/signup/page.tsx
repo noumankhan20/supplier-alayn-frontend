@@ -25,6 +25,9 @@ import { passwordProblem } from "@/lib/passwordPolicy";
 import { MAIN_APP_URL } from "@/lib/apiBase";
 import { useShake } from "@/lib/useShake";
 import { useHydrated } from "@/lib/useHydrated";
+import { apiErrorMessage } from "@/lib/apiError";
+import { userFromResponse } from "@/lib/authSession";
+import { writeUserHint } from "@/components/landing/landingSession";
 import AuthShowcase from "@/components/auth/AuthShowcase";
 import GuestGuard from "@/components/auth/GuestGuard";
 
@@ -175,23 +178,18 @@ function SignupFormContent() {
         },
       }).unwrap();
 
-      const user = res?.data?.user || res?.data || res?.user;
+      const user = userFromResponse(res);
       if (user) {
         dispatch(setCredentials({ user }));
+        writeUserHint(user);
       }
 
       setSubmitSuccess(true);
       setTimeout(() => {
         router.replace("/orders");
       }, 1200);
-    } catch (err: any) {
-      setSubmitError(
-        err?.data?.error?.message ||
-          err?.data?.message ||
-          (typeof err?.data?.error === "string" ? err?.data?.error : null) ||
-          err?.message ||
-          "Failed to register supplier. Please try again."
-      );
+    } catch (err) {
+      setSubmitError(apiErrorMessage(err, "Failed to register supplier. Please try again."));
       setShakeKey((k) => k + 1);
     }
   };

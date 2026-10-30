@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { verifySession } from "@/redux/slices/authSlice";
+import { safeNextPath } from "@/lib/authSession";
 import AuthLoader from "./AuthLoader";
 
 interface GuestGuardProps {
@@ -13,15 +14,6 @@ interface GuestGuardProps {
 export default function GuestGuard({ children }: GuestGuardProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-
-  const [nextParam, setNextParam] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setNextParam(params.get("next"));
-    }
-  }, []);
 
   const status = useAppSelector((s) => s.auth.status);
   const user = useAppSelector((s) => s.auth.user);
@@ -35,10 +27,9 @@ export default function GuestGuard({ children }: GuestGuardProps) {
   useEffect(() => {
     // Only redirect if already authenticated AS A SUPPLIER
     if (status === "authenticated" && user?.role === "SUPPLIER") {
-      const next = nextParam || "/orders";
-      router.replace(next);
+      router.replace(safeNextPath(new URLSearchParams(window.location.search).get("next")));
     }
-  }, [status, user, router, nextParam]);
+  }, [status, user, router]);
 
   // If authenticated as a supplier, hold while redirecting to orders
   if (status === "authenticated" && user?.role === "SUPPLIER") {

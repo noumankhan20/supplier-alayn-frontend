@@ -19,7 +19,23 @@ export type SessionCheck =
   | { kind: "unauthenticated" }
   | { kind: "unavailable" };
 
-const JSON_HEADERS = { "x-portal": "tenant" };
+const JSON_HEADERS = { "x-portal": "supplier" };
+
+/** Login and sign-up answer `{ data: { user } }`; /auth/me answers `{ data: user }`. */
+export function userFromResponse(body: unknown): AuthUser | null {
+  const data = (body as { data?: (Partial<AuthUser> & { user?: AuthUser }) | null } | null)?.data;
+  const user = data?.user ?? data;
+  return user && typeof user.role === "string" ? (user as AuthUser) : null;
+}
+
+/**
+ * Where to go after signing in. Only a path inside this portal is accepted, so a crafted
+ * `?next=https://evil.example` or `?next=//evil.example` can't send the user off-site.
+ */
+export function safeNextPath(next: string | null | undefined, fallback = "/orders"): string {
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return fallback;
+  return next;
+}
 
 let inflightRefresh: Promise<RefreshOutcome> | null = null;
 let lastRefreshOkAt = 0;
@@ -62,8 +78,7 @@ export async function checkSession(): Promise<SessionCheck> {
     });
 
     if (res.ok) {
-      const data = await res.json();
-      const user = data?.data?.user || data?.data || data?.user;
+      const user = userFromResponse(await res.json());
       if (user) return { kind: "ok", user };
     }
 
@@ -77,8 +92,7 @@ export async function checkSession(): Promise<SessionCheck> {
           headers: JSON_HEADERS,
         });
         if (retryRes.ok) {
-          const data = await retryRes.json();
-          const user = data?.data?.user || data?.data || data?.user;
+          const user = userFromResponse(await retryRes.json());
           if (user) return { kind: "ok", user };
         }
       }

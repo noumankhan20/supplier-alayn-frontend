@@ -11,6 +11,9 @@ import { setCredentials, logout } from "@/redux/slices/authSlice";
 import { MAIN_APP_URL } from "@/lib/apiBase";
 import { useShake } from "@/lib/useShake";
 import { useHydrated } from "@/lib/useHydrated";
+import { apiErrorMessage } from "@/lib/apiError";
+import { safeNextPath, userFromResponse } from "@/lib/authSession";
+import { writeUserHint } from "@/components/landing/landingSession";
 import AuthShowcase from "@/components/auth/AuthShowcase";
 import GuestGuard from "@/components/auth/GuestGuard";
 import AuthLoader from "@/components/auth/AuthLoader";
@@ -49,11 +52,11 @@ function LoginFormContent() {
         password,
       }).unwrap();
 
-      const payload = response?.data || response;
-      const user = payload?.user || payload;
+      const user = userFromResponse(response);
       const role = user?.role;
 
-      if (role !== "SUPPLIER") {
+      // The server already refuses non-suppliers on this portal; this is a second line of defence.
+      if (!user || role !== "SUPPLIER") {
         dispatch(logout());
         const roleLabel = (role || "").replace(/_/g, " ");
         setError(
@@ -63,23 +66,11 @@ function LoginFormContent() {
         return;
       }
 
-      dispatch(setCredentials(payload));
-
-      const next =
-        searchParams?.get("next") ||
-        (typeof window !== "undefined"
-          ? new URLSearchParams(window.location.search).get("next")
-          : null) ||
-        "/orders";
-      router.replace(next);
-    } catch (err: any) {
-      setError(
-        err?.data?.error?.message ||
-        err?.data?.message ||
-        (typeof err?.data?.error === "string" ? err?.data?.error : null) ||
-        err?.message ||
-        "Invalid email or password."
-      );
+      dispatch(setCredentials({ user }));
+      writeUserHint(user);
+      router.replace(safeNextPath(searchParams.get("next")));
+    } catch (err) {
+      setError(apiErrorMessage(err, "Invalid email or password."));
       setErrorCount((n) => n + 1);
     }
   };
@@ -261,7 +252,7 @@ function LoginFormContent() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !hydrated}
               className="mt-6 flex w-full justify-center items-center gap-2 rounded-lg bg-[#C41E2A] py-2.5 px-4 text-xs sm:text-sm font-bold text-white shadow-md hover:bg-[#A81822] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#C41E2A] focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (

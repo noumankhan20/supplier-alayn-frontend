@@ -1,8 +1,20 @@
-import { baseApi } from "../store/baseApi";
+import { baseApi, type ApiEnvelope } from "../store/baseApi";
+import { userFromResponse, type AuthUser } from "@/lib/authSession";
+
+export interface LoginBody {
+  email: string;
+  password: string;
+}
+
+/** What login and supplier sign-up answer with. */
+export interface SessionResponse {
+  message?: string;
+  user: AuthUser;
+}
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation({
+    login: builder.mutation<ApiEnvelope<SessionResponse>, LoginBody>({
       query: (body) => ({
         url: "/auth/login",
         method: "POST",
@@ -12,7 +24,7 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
-    registerSupplier: builder.mutation({
+    registerSupplier: builder.mutation<ApiEnvelope<SessionResponse>, Record<string, unknown>>({
       query: (body) => ({
         url: "/auth/register-supplier",
         method: "POST",
@@ -22,10 +34,10 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
-    getMe: builder.query({
+    getMe: builder.query<AuthUser | null, void>({
       query: () => "/auth/me",
       providesTags: ["Auth"],
-      transformResponse: (res: any) => res?.data?.user || res?.data || res?.user,
+      transformResponse: (res: unknown) => userFromResponse(res),
     }),
 
     logout: builder.mutation({

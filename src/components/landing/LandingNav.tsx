@@ -1,39 +1,39 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useHydrated } from "@/lib/useHydrated";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMagnetic, springSnappy } from "./motion/primitives";
 import { readStoredUser, verifyStoredUser, logoutFromLanding, type LandingUser } from "./landingSession";
 import { formatRole } from "@/lib/utils";
-import { LayoutGrid, User, LogOut, ChevronDown, Menu, X, Package, Layers } from "lucide-react";
+import { LayoutGrid, User, LogOut, ChevronDown, Menu, X } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { ref: signupRef, x, y } = useMagnetic(0.2);
-  const [user, setUser] = useState<LandingUser | null>(null);
+  // Show the remembered name straight away (after hydration, so server and browser render alike),
+  // then let the server confirm it. If the session has ended the signed-in menu disappears; a
+  // network hiccup leaves it alone.
+  const hint = useMemo(() => (mounted ? readStoredUser() : null), [mounted]);
+  const [confirmed, setConfirmed] = useState<LandingUser | null | undefined>(undefined);
+  const user = confirmed !== undefined ? confirmed : hint;
   const isAuthenticated = user !== null;
 
   useEffect(() => {
-    // Show the remembered name straight away, then let the server confirm it. If the session has
-    // ended the signed-in menu disappears; a network hiccup leaves it alone.
-    const hint = readStoredUser();
-    setUser(hint);
-    setMounted(true);
-
     let cancelled = false;
-    if (hint) {
-      verifyStoredUser().then((confirmed) => {
-        if (cancelled || confirmed === "unknown") return;
-        setUser(confirmed);
+    if (readStoredUser()) {
+      verifyStoredUser().then((result) => {
+        if (cancelled || result === "unknown") return;
+        setConfirmed(result);
       });
     }
 
@@ -188,10 +188,9 @@ export default function LandingNav() {
                 Log in
               </Link>
               <motion.div
-                ref={signupRef as any}
-                animate={{ x, y } as any}
+                ref={signupRef as React.Ref<HTMLDivElement>}
                 transition={springSnappy}
-                style={{ display: "inline-block" }}
+                style={{ x, y, display: "inline-block" }}
               >
                 <Link
                   href="/signup"

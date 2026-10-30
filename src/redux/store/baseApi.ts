@@ -18,7 +18,7 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   credentials: "include",
   prepareHeaders: (headers) => {
-    headers.set("x-portal", "tenant");
+    headers.set("x-portal", "supplier");
     return headers;
   },
 });
@@ -58,6 +58,12 @@ const baseQueryWithReauth: BaseQueryFn<
 
   return result;
 };
+
+/** Every successful API response is `{ success: true, data }`. */
+export interface ApiEnvelope<T> {
+  success: boolean;
+  data: T;
+}
 
 export const baseApi = createApi({
   reducerPath: "api",

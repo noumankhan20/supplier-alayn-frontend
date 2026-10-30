@@ -1,4 +1,4 @@
-import { baseApi } from "../store/baseApi";
+import { baseApi, type ApiEnvelope } from "../store/baseApi";
 
 export interface SupplierItemApi {
   id: string;
@@ -38,7 +38,7 @@ export const supplierApi = baseApi.injectEndpoints({
     getMyProfile: builder.query<SupplierProfileApi, void>({
       query: () => "/suppliers/my-profile",
       providesTags: ["Supplier"],
-      transformResponse: (response: any) => response?.data ?? response,
+      transformResponse: (response: ApiEnvelope<SupplierProfileApi>) => response.data,
     }),
 
     updateMyProfile: builder.mutation<SupplierProfileApi, Partial<SupplierProfileApi>>({
@@ -48,14 +48,13 @@ export const supplierApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: ["Supplier"],
-      transformResponse: (response: any) => response?.data ?? response,
+      transformResponse: (response: ApiEnvelope<SupplierProfileApi>) => response.data,
     }),
 
     getMyCatalog: builder.query<SupplierItemApi[], void>({
       query: () => "/suppliers/my-catalog",
       providesTags: ["SupplierCatalog"],
-      transformResponse: (response: any) =>
-        Array.isArray(response) ? response : response?.data || [],
+      transformResponse: (response: ApiEnvelope<SupplierItemApi[] | null>) => response.data ?? [],
     }),
 
     createSupplierItem: builder.mutation<SupplierItemApi, Partial<SupplierItemApi>>({
@@ -65,7 +64,7 @@ export const supplierApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: ["SupplierCatalog"],
-      transformResponse: (response: any) => response?.data ?? response,
+      transformResponse: (response: ApiEnvelope<SupplierItemApi>) => response.data,
     }),
 
     updateSupplierItem: builder.mutation<
@@ -78,7 +77,7 @@ export const supplierApi = baseApi.injectEndpoints({
         body: data,
       }),
       invalidatesTags: ["SupplierCatalog"],
-      transformResponse: (response: any) => response?.data ?? response,
+      transformResponse: (response: ApiEnvelope<SupplierItemApi>) => response.data,
     }),
 
     deleteSupplierItem: builder.mutation<{ message: string }, string>({

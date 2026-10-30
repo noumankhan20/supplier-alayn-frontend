@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
 import {
   Package,
   Truck,
@@ -11,16 +10,10 @@ import {
   XCircle,
   Search,
   Building2,
-  FileText,
   Send,
   Eye,
   Loader2,
-  Plus,
-  Minus,
   Check,
-  Calendar,
-  Layers,
-  ArrowRight,
 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -33,6 +26,7 @@ import {
 } from "@/redux/slices/procurementApiSlice";
 import { useAppSelector } from "@/redux/store/hooks";
 import { formatPrice } from "@/lib/utils";
+import { apiErrorMessage } from "@/lib/apiError";
 
 function formatOrderNo(po: { id: string; poNumber?: string }): string {
   if (po.poNumber) return po.poNumber;
@@ -128,8 +122,8 @@ export default function SupplierDashboardPage() {
         supplierNotes: "Order is currently being packed for delivery",
       }).unwrap();
       refetch();
-    } catch (err: any) {
-      alert(err?.data?.message || "Failed to update order status");
+    } catch (err) {
+      alert(apiErrorMessage(err, "Failed to update order status"));
     }
   };
 
@@ -150,8 +144,8 @@ export default function SupplierDashboardPage() {
       setActionModalType(null);
       setSelectedPO(null);
       refetch();
-    } catch (err: any) {
-      alert(err?.data?.message || "Failed to update order status");
+    } catch (err) {
+      alert(apiErrorMessage(err, "Failed to update order status"));
     }
   };
 
@@ -202,8 +196,8 @@ export default function SupplierDashboardPage() {
       setActionModalType(null);
       setSelectedPO(null);
       refetch();
-    } catch (err: any) {
-      alert(err?.data?.message || "Failed to record dispatch");
+    } catch (err) {
+      alert(apiErrorMessage(err, "Failed to record dispatch"));
     }
   };
 
@@ -389,9 +383,16 @@ export default function SupplierDashboardPage() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 mt-2">
-                        <span className="flex items-center gap-1 font-semibold text-gray-800">
+                        <span className="flex items-center gap-1.5 font-bold text-gray-900">
                           <Building2 className="w-3.5 h-3.5 text-gray-400" />
-                          {po.outlet?.name || "Main Restaurant"}
+                          {po.outlet?.restaurantName ? (
+                            <>
+                              <span>{po.outlet.restaurantName}</span>
+                              <span className="text-gray-400 font-normal">({po.outlet.name})</span>
+                            </>
+                          ) : (
+                            <span>{po.outlet?.name || "Restaurant"}</span>
+                          )}
                         </span>
                         {po.createdAt && (
                           <span className="flex items-center gap-1">
@@ -698,23 +699,52 @@ export default function SupplierDashboardPage() {
               </div>
 
               <div className="space-y-4 max-h-[60vh] overflow-y-auto text-xs">
-                <div className="grid grid-cols-2 gap-3 p-3 bg-[#F8FAFC] rounded-xl border border-gray-100">
-                  <div>
-                    <span className="text-gray-400 font-medium block">
-                      Restaurant Outlet
-                    </span>
-                    <span className="font-bold text-gray-800">
-                      {selectedPO.outlet?.name || "Main Outlet"}
-                    </span>
+                <div className="p-3 bg-[#F8FAFC] rounded-xl border border-gray-100 space-y-2.5">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-gray-400 font-medium block">
+                        Restaurant
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        {selectedPO.outlet?.restaurantName || selectedPO.outlet?.name || "Restaurant"}
+                      </span>
+                      {selectedPO.outlet?.restaurantName && (
+                        <span className="text-[11px] text-gray-500 block">
+                          Branch: {selectedPO.outlet.name}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-gray-400 font-medium block">
+                        Total Invoice Value
+                      </span>
+                      <span className="font-bold text-[#D3232A] text-sm">
+                        ₹{formatPrice(selectedPO.totalAmountPaise)}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-gray-400 font-medium block">
-                      Total Invoice Value
-                    </span>
-                    <span className="font-bold text-[#D3232A]">
-                      ₹{formatPrice(selectedPO.totalAmountPaise)}
-                    </span>
-                  </div>
+
+                  {(selectedPO.outlet?.address || selectedPO.outlet?.phone) && (
+                    <div className="pt-2 border-t border-gray-200/60 grid grid-cols-2 gap-3 text-[11px]">
+                      {selectedPO.outlet?.address && (
+                        <div>
+                          <span className="text-gray-400 font-medium block">Delivery Address</span>
+                          <span className="text-gray-700">
+                            {selectedPO.outlet.address}
+                            {selectedPO.outlet.city ? `, ${selectedPO.outlet.city}` : ""}
+                          </span>
+                        </div>
+                      )}
+                      {selectedPO.outlet?.phone && (
+                        <div>
+                          <span className="text-gray-400 font-medium block">Contact Number</span>
+                          <span className="text-gray-700 font-mono">
+                            {selectedPO.outlet.phone}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div>
