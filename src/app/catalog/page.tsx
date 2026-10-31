@@ -52,8 +52,6 @@ const COMMON_UNITS = [
   "pcs",
 ];
 
-const QUALITY_GRADES = ["Grade A", "Organic", "Premium", "Standard"];
-
 export default function SupplierCatalogPage() {
   const { data: catalog = [], isLoading, refetch } = useGetMyCatalogQuery();
   const [createItem, { isLoading: isCreating }] = useCreateSupplierItemMutation();
@@ -80,7 +78,6 @@ export default function SupplierCatalogPage() {
     priceRupees: "",
     minOrderQty: "1",
     inStock: true,
-    qualityGrade: "Grade A",
     leadTimeHours: "24",
     description: "",
   });
@@ -125,8 +122,7 @@ export default function SupplierCatalogPage() {
       priceRupees: "",
       minOrderQty: "1",
       inStock: true,
-      qualityGrade: "Grade A",
-      leadTimeHours: "24",
+        leadTimeHours: "24",
       description: "",
     });
     setFormError("");
@@ -143,7 +139,6 @@ export default function SupplierCatalogPage() {
       priceRupees: (item.pricePaise / 100).toString(),
       minOrderQty: item.minOrderQty.toString(),
       inStock: item.inStock,
-      qualityGrade: item.qualityGrade || "Grade A",
       leadTimeHours: item.leadTimeHours.toString(),
       description: item.description || "",
     });
@@ -173,7 +168,6 @@ export default function SupplierCatalogPage() {
       pricePaise: Math.round(priceNum * 100),
       minOrderQty: Math.max(1, parseFloat(formData.minOrderQty) || 1),
       inStock: formData.inStock,
-      qualityGrade: formData.qualityGrade,
       leadTimeHours: Math.max(1, parseInt(formData.leadTimeHours, 10) || 24),
       description: formData.description.trim() || undefined,
     };
@@ -361,11 +355,6 @@ export default function SupplierCatalogPage() {
                           <div className="text-[11px] font-mono text-gray-400">
                             SKU: {item.sku}
                           </div>
-                        )}
-                        {item.qualityGrade && (
-                          <span className="inline-block mt-0.5 text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-semibold">
-                            {item.qualityGrade}
-                          </span>
                         )}
                       </td>
 
@@ -576,27 +565,7 @@ export default function SupplierCatalogPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block font-bold text-[#1B2A4A] mb-1">
-                    Quality Grade
-                  </label>
-                  <select
-                    value={formData.qualityGrade}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        qualityGrade: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#D3232A]"
-                  >
-                    {QUALITY_GRADES.map((g) => (
-                      <option key={g} value={g}>
-                        {g}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+
               </div>
 
               <div>
